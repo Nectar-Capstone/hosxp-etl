@@ -1,0 +1,96 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model DoctorOrderPrint {
+  doctor_order_print_code Int       @id @default(autoincrement())
+  doctor_code             String?
+  drug_name               String?
+  shortlist               String?
+  doctor_name             String?
+  icode                   String?
+  hn                      String?
+  hnRef                   Patient?  @relation(fields: [hn], references: [hn])
+  icodeRef                DrugItem? @relation(fields: [icode], references: [icode])
+
+  @@index([hn], map: "DoctorOrderPrint_hn_fkey")
+  @@index([icode], map: "DoctorOrderPrint_icode_fkey")
+}
+
+model DrugItem {
+  icode              String             @id
+  name               String?
+  strength           String?
+  units              String?
+  unitprice          Float?
+  dosageform         String?
+  criticalpriority   String?
+  drugaccount        String?
+  drugcategory       String?
+  doctor_order_print DoctorOrderPrint[]
+}
+
+model Icd10 {
+  icd10_code    String     @id
+  name          String
+  spclty        String?
+  tname         String?
+  code3         String?
+  code4         String?
+  code5         String?
+  sex           String
+  ipd_valid     String?
+  icd10compat   String?
+  icd10tmcompat String?
+  active_status String?
+  hos_guid      String?
+  hos_guid_ext  String?
+  ovstdiag      OvstDiag[]
+}
+
+model OpdAllergy {
+  hn          String
+  report_date DateTime?
+  agent       String
+  symptom     String?
+  reporter    String?
+  note        String?
+  seriousness String?
+  patient     Patient   @relation(fields: [hn], references: [hn])
+
+  @@id([hn, agent])
+}
+
+model OvstDiag {
+  ovst_diag_id  Int       @id @default(autoincrement())
+  icd10_code    String?
+  hn            String?
+  vstdate       DateTime?
+  vsttime       DateTime?
+  hnRef         Patient?  @relation(fields: [hn], references: [hn])
+  icd10_codeRef Icd10?    @relation(fields: [icd10_code], references: [icd10_code])
+
+  @@index([hn], map: "OvstDiag_hn_fkey")
+  @@index([icd10_code], map: "OvstDiag_icd10_code_fkey")
+}
+
+model Patient {
+  hn                 String             @id
+  pname              String?
+  fname              String?
+  lname              String?
+  birthday           DateTime?
+  bloodgrp           String?
+  nationality        String?
+  sex                String?
+  citizenship        String?
+  bloodgroup_rh      String?
+  doctor_order_print DoctorOrderPrint[]
+  opd_allergy        OpdAllergy[]
+  ovstdiag           OvstDiag[]
+}
