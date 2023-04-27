@@ -7,6 +7,7 @@ CREATE TABLE `DoctorOrderPrint` (
     `doctor_name` VARCHAR(191) NULL,
     `icode` VARCHAR(191) NULL,
     `hn` VARCHAR(191) NULL,
+    `createdAt` TIMESTAMP(0) NULL DEFAULT CURRENT_TIMESTAMP(0),
 
     INDEX `DoctorOrderPrint_hn_fkey`(`hn`),
     INDEX `DoctorOrderPrint_icode_fkey`(`icode`),
@@ -57,6 +58,7 @@ CREATE TABLE `OpdAllergy` (
     `reporter` VARCHAR(191) NULL,
     `note` VARCHAR(191) NULL,
     `seriousness` VARCHAR(191) NULL,
+    `createdAt` TIMESTAMP(0) NULL DEFAULT CURRENT_TIMESTAMP(0),
 
     PRIMARY KEY (`hn`, `agent`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -68,6 +70,7 @@ CREATE TABLE `OvstDiag` (
     `hn` VARCHAR(191) NULL,
     `vstdate` DATETIME(3) NULL,
     `vsttime` DATETIME(3) NULL,
+    `crreateAt` TIMESTAMP(0) NULL DEFAULT CURRENT_TIMESTAMP(0),
 
     INDEX `OvstDiag_hn_fkey`(`hn`),
     INDEX `OvstDiag_icd10_code_fkey`(`icd10_code`),
@@ -85,7 +88,14 @@ CREATE TABLE `Patient` (
     `nationality` VARCHAR(191) NULL,
     `sex` VARCHAR(191) NULL,
     `citizenship` VARCHAR(191) NULL,
+    `cid` VARCHAR(45) NULL,
     `bloodgroup_rh` VARCHAR(191) NULL,
+    `contact_name` VARCHAR(45) NULL,
+    `contact_uid` VARCHAR(45) NULL,
+    `contact_relationship` VARCHAR(45) NULL,
+    `contact_gender` VARCHAR(45) NULL,
+    `contact_telecom` VARCHAR(45) NULL,
+    `createdAt` TIMESTAMP(0) NULL DEFAULT CURRENT_TIMESTAMP(0),
 
     PRIMARY KEY (`hn`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

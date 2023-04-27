@@ -15,6 +15,7 @@ model DoctorOrderPrint {
   doctor_name             String?
   icode                   String?
   hn                      String?
+  createdAt               DateTime? @default(now()) @db.Timestamp(0)
   hnRef                   Patient?  @relation(fields: [hn], references: [hn])
   icodeRef                DrugItem? @relation(fields: [icode], references: [icode])
 
@@ -61,6 +62,7 @@ model OpdAllergy {
   reporter    String?
   note        String?
   seriousness String?
+  createdAt   DateTime? @default(now()) @db.Timestamp(0)
   patient     Patient   @relation(fields: [hn], references: [hn])
 
   @@id([hn, agent])
@@ -72,6 +74,7 @@ model OvstDiag {
   hn            String?
   vstdate       DateTime?
   vsttime       DateTime?
+  crreateAt     DateTime? @default(now()) @db.Timestamp(0)
   hnRef         Patient?  @relation(fields: [hn], references: [hn])
   icd10_codeRef Icd10?    @relation(fields: [icd10_code], references: [icd10_code])
 
@@ -80,17 +83,24 @@ model OvstDiag {
 }
 
 model Patient {
-  hn                 String             @id
-  pname              String?
-  fname              String?
-  lname              String?
-  birthday           DateTime?
-  bloodgrp           String?
-  nationality        String?
-  sex                String?
-  citizenship        String?
-  bloodgroup_rh      String?
-  doctor_order_print DoctorOrderPrint[]
-  opd_allergy        OpdAllergy[]
-  ovstdiag           OvstDiag[]
+  hn                   String             @id
+  pname                String?
+  fname                String?
+  lname                String?
+  birthday             DateTime?
+  bloodgrp             String?
+  nationality          String?
+  sex                  String?
+  citizenship          String?
+  cid                  String?            @db.VarChar(45)
+  bloodgroup_rh        String?
+  contact_name         String?            @db.VarChar(45)
+  contact_uid          String?            @db.VarChar(45)
+  contact_relationship String?            @db.VarChar(45)
+  contact_gender       String?            @db.VarChar(45)
+  contact_telecom      String?            @db.VarChar(45)
+  createdAt            DateTime?          @default(now()) @db.Timestamp(0)
+  doctor_order_print   DoctorOrderPrint[]
+  opd_allergy          OpdAllergy[]
+  ovstdiag             OvstDiag[]
 }
