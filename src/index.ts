@@ -16,37 +16,43 @@ dotenv.config();
 //   }
 // });
 
-const main = async () => {
-  const prisma = new PrismaClient();
-  try {
-    const allPatient = await prisma.patient.findMany();
-    console.log(JSON.stringify(allPatient, null, 4));
-    await prisma.$disconnect();
-  } catch (error) {
-    console.log(error);
-    await prisma.$disconnect();
-  }
-};
+const kafka = new Kafka({
+  clientId: "my-app",
+  brokers: ["broker:29092"],
+});
 
-main();
+const producer = kafka.producer();
 
-// const kafka = new Kafka({
-//   clientId: "my-app",
-//   brokers: [process.env.KAFKA ? process.env.KAFKA : "localhost:9092"],
-// });
+var task = cron.schedule("* * * * *", async () => {
+  await producer.connect();
+  console.log("running cron");
+  await producer.send({
+    topic: "test4",
+    messages: [
+      {
+        value: `sent at => ${new Date().toISOString()}`,
+      },
+    ],
+  });
+  await producer.disconnect();
+});
 
-// const producer = kafka.producer();
-
-// var task = cron.schedule("* * * * *", async () => {
+// const main = async () => {
+//   const prisma = new PrismaClient();
+//   const allPatient = await prisma.patient.findMany();
 //   await producer.connect();
-//   console.log("running cron");
+//   console.log("connected");
 //   await producer.send({
 //     topic: "test3",
 //     messages: [
 //       {
-//         value: `sent at => ${new Date().toISOString()}`,
+//         value: `at time: ${new Date().toUTCString()} => patient: ${JSON.stringify(
+//           allPatient
+//         )}`,
 //       },
 //     ],
 //   });
 //   await producer.disconnect();
-// });
+// };
+
+// main();
