@@ -7,11 +7,8 @@ networks:
 services:
   hosxp:
     build: 
-      context: .
+      context: ./hosxp-etl
       dockerfile: Dockerfile
-    volumes:
-      - .:/app/
-      - /app/node_modules
     depends_on:
       - db
       - broker
