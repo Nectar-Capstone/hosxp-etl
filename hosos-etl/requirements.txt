@@ -1,0 +1,4 @@
+pandas==1.5.3
+mysql-connector-python==8.0.32
+kafka-python==2.0.2
+schedule==1.2.0
