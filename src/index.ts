@@ -24,62 +24,55 @@ const producer = kafka.producer({
 
 const prisma = new PrismaClient();
 
-// var task = cron.schedule("* * * * *", async () => {
-//   try {
-//     await producer.connect();
-//     console.log("running cron");
-//     const allPatient = await prisma.patient.findMany();
-//     console.log(JSON.stringify(allPatient, null, 4));
-//     await producer.send({
-//       topic: "patient1",
-//       messages: [
-//         {
-//           value: `sent at => ${new Date().toISOString()} with value ${allPatient}`,
-//         },
-//       ],
-//     });
-//     await producer.disconnect();
-//     await prisma.$disconnect();
-//   } catch (error) {
-//     console.log(error);
-//     await prisma.$disconnect();
-//   }
-// });
+var task = cron.schedule("* * * * *", async () => {
+  try {
+    await producer.connect();
+    console.log("running cron");
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
 
-const main = async () => {
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-
-  const allPatient = await prisma.patient.findMany({
-    include: {
-      doctor_order_print: {
-        where: {
-          createdAt: {
-            gte: yesterday.toISOString(),
+    const allPatient = await prisma.patient.findMany({
+      include: {
+        doctor_order_print: {
+          where: {
+            createdAt: {
+              gte: yesterday.toISOString(),
+            },
+          },
+        },
+        opd_allergy: {
+          where: {
+            createdAt: {
+              gte: yesterday.toISOString(),
+            },
+          },
+        },
+        ovstdiag: {
+          where: {
+            crreateAt: {
+              gte: yesterday.toISOString(),
+            },
           },
         },
       },
-      opd_allergy: {
-        where: {
-          createdAt: {
-            gte: yesterday.toISOString(),
-          },
+    });
+    const patientISP = transformToISP(allPatient);
+    console.log(JSON.stringify(patientISP, null, 4));
+    await producer.send({
+      topic: "patient1",
+      messages: [
+        {
+          value: `sent at => ${new Date().toISOString()} with value ${patientISP}`,
         },
-      },
-      ovstdiag: {
-        where: {
-          crreateAt: {
-            gte: yesterday.toISOString(),
-          },
-        },
-      },
-    },
-  });
-
-  console.log(JSON.stringify(transformToISP(allPatient), null, 4));
-};
-
-main();
+      ],
+    });
+    await producer.disconnect();
+    await prisma.$disconnect();
+  } catch (error) {
+    console.log(error);
+    await prisma.$disconnect();
+  }
+});
 
 type prismaPatients = (Patient & {
   doctor_order_print: DoctorOrderPrint[];
@@ -134,7 +127,7 @@ const transformToISP = (patients: prismaPatients): patientISP[] => {
       uid: sha256(patient.cid),
       cid: patient.cid,
       name: `${patient.fname} ${patient.lname}`,
-      brithdate: patient.birthday,
+      birthdate: patient.birthday,
       gender: patient.contact_gender,
       telecom: patient.contact_telecom,
       contact_name: patient.contact_name,

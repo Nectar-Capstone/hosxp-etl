@@ -6,7 +6,9 @@ networks:
 
 services:
   hosxp:
-    build: .
+    build: 
+      context: .
+      dockerfile: Dockerfile
     volumes:
       - .:/app/
       - /app/node_modules

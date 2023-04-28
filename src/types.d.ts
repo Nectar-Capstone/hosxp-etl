@@ -15,7 +15,7 @@ export interface patient {
   uid: string;
   cid: string;
   name: string;
-  brithdate: Date;
+  birthdate: Date;
   gender: string;
   telecom: string;
   contact_name: string;
