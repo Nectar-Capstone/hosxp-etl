@@ -23,6 +23,7 @@
     "dotenv": "^16.0.3",
     "kafkajs": "^2.2.4",
     "node-cron": "^3.0.2",
-    "node-schedule": "^2.1.1"
+    "node-schedule": "^2.1.1",
+    "sjcl": "^1.0.8"
   }
 }
