@@ -60,6 +60,7 @@ CREATE TABLE `OpdAllergy` (
     `seriousness` VARCHAR(191) NULL,
     `createdAt` TIMESTAMP(0) NULL DEFAULT CURRENT_TIMESTAMP(0),
 
+    INDEX `allergy_agent_idx`(`agent`),
     PRIMARY KEY (`hn`, `agent`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -70,7 +71,7 @@ CREATE TABLE `OvstDiag` (
     `hn` VARCHAR(191) NULL,
     `vstdate` DATETIME(3) NULL,
     `vsttime` DATETIME(3) NULL,
-    `crreateAt` TIMESTAMP(0) NULL DEFAULT CURRENT_TIMESTAMP(0),
+    `createdAt` TIMESTAMP(0) NULL DEFAULT CURRENT_TIMESTAMP(0),
 
     INDEX `OvstDiag_hn_fkey`(`hn`),
     INDEX `OvstDiag_icd10_code_fkey`(`icd10_code`),
@@ -80,6 +81,7 @@ CREATE TABLE `OvstDiag` (
 -- CreateTable
 CREATE TABLE `Patient` (
     `hn` VARCHAR(191) NOT NULL,
+    `cid` VARCHAR(45) NULL,
     `pname` VARCHAR(191) NULL,
     `fname` VARCHAR(191) NULL,
     `lname` VARCHAR(191) NULL,
@@ -88,16 +90,22 @@ CREATE TABLE `Patient` (
     `nationality` VARCHAR(191) NULL,
     `sex` VARCHAR(191) NULL,
     `citizenship` VARCHAR(191) NULL,
-    `cid` VARCHAR(45) NULL,
     `bloodgroup_rh` VARCHAR(191) NULL,
-    `contact_name` VARCHAR(45) NULL,
-    `contact_uid` VARCHAR(45) NULL,
-    `contact_relationship` VARCHAR(45) NULL,
-    `contact_gender` VARCHAR(45) NULL,
-    `contact_telecom` VARCHAR(45) NULL,
     `createdAt` TIMESTAMP(0) NULL DEFAULT CURRENT_TIMESTAMP(0),
+    `contact_telecom` VARCHAR(45) NULL,
+    `contact_gender` VARCHAR(45) NULL,
+    `contact_relationship` VARCHAR(45) NULL,
+    `contact_name` VARCHAR(45) NULL,
 
     PRIMARY KEY (`hn`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `AllergyAgent` (
+    `id` VARCHAR(10) NOT NULL,
+    `name` VARCHAR(50) NULL,
+
+    PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- AddForeignKey
@@ -108,6 +116,9 @@ ALTER TABLE `DoctorOrderPrint` ADD CONSTRAINT `DoctorOrderPrint_icode_fkey` FORE
 
 -- AddForeignKey
 ALTER TABLE `OpdAllergy` ADD CONSTRAINT `OpdAllergy_hn_fkey` FOREIGN KEY (`hn`) REFERENCES `Patient`(`hn`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `OpdAllergy` ADD CONSTRAINT `allergy_agent` FOREIGN KEY (`agent`) REFERENCES `AllergyAgent`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE `OvstDiag` ADD CONSTRAINT `OvstDiag_hn_fkey` FOREIGN KEY (`hn`) REFERENCES `Patient`(`hn`) ON DELETE SET NULL ON UPDATE CASCADE;

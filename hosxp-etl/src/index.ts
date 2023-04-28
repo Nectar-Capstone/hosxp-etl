@@ -49,7 +49,7 @@ var task = cron.schedule("* * * * *", async () => {
         },
         ovstdiag: {
           where: {
-            crreateAt: {
+            createdAt: {
               gte: yesterday.toISOString(),
             },
           },
