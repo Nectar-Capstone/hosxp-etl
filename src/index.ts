@@ -47,11 +47,32 @@ const prisma = new PrismaClient();
 // });
 
 const main = async () => {
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+
   const allPatient = await prisma.patient.findMany({
     include: {
-      doctor_order_print: true,
-      opd_allergy: true,
-      ovstdiag: true,
+      doctor_order_print: {
+        where: {
+          createdAt: {
+            gte: yesterday.toISOString(),
+          },
+        },
+      },
+      opd_allergy: {
+        where: {
+          createdAt: {
+            gte: yesterday.toISOString(),
+          },
+        },
+      },
+      ovstdiag: {
+        where: {
+          crreateAt: {
+            gte: yesterday.toISOString(),
+          },
+        },
+      },
     },
   });
 
