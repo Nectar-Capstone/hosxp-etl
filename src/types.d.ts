@@ -5,24 +5,23 @@ export interface message {
 }
 
 export interface patientISP {
+  patient: patient;
+  isTaking: isTaking[];
+  isAllergic: isAllergic[];
+  isHaving: isHaving[];
+}
+
+export interface patient {
   uid: string;
   cid: string;
   name: string;
   brithdate: Date;
   gender: string;
   telecom: string;
-  contact: Contact;
-  isTaking: isTaking[];
-  isAllergic: isAllergic[];
-  isHaving: isHaving[];
-}
-
-export interface Contact {
-  name: string;
-  uid: string;
-  relationship: string;
-  gender: string;
-  telecom: string;
+  contact_name: string;
+  contact_relationship: string;
+  contact_gender: string;
+  contact_telecom: string;
 }
 
 export interface isTaking {
@@ -49,7 +48,7 @@ export interface isHaving {
   code: string;
   clinicalStatus?: string;
   verificationStatus?: string;
-  cetegory?: string;
+  category?: string;
   severity?: string;
   recordDate: Date;
 }
