@@ -6,6 +6,17 @@ networks:
 
 services:
 
+  reverse-proxy:
+    image: nginx:latest
+    ports:
+      - '80:80'
+    volumes:
+      - ./default.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - nectar-api
+    networks:
+      - rmoff_kafka
+
   nectar-api:
     build: 
       context: ./Nectar-api
@@ -41,6 +52,7 @@ services:
       - broker
     networks:
       - rmoff_kafka
+    restart: always
 
   hosos:
     build: 

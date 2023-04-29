@@ -19,8 +19,7 @@ async function consumeMessages(topic) {
       // });
       // '[{}]'
       const msg = JSON.parse(message.value.toString());
-      console.log(typeof msg);
-
+      console.log(JSON.stringify(msg, null, 4));
       // [{}]
       msg.forEach(async (data) => {
         const patient = patientData(data.patient);
@@ -74,4 +73,4 @@ function havingData(having) {
   return tempHaving;
 }
 
-consumeMessages("patient3");
+consumeMessages("patient2");

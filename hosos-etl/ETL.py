@@ -2,7 +2,7 @@ import mysql.connector
 import schedule
 import time
 import pandas as pd
-from json import dumps
+from json import dumps, loads
 from kafka import KafkaProducer
 
 # Have not cap create_date yet -> add WHERE creat_at > DATE(NOW()) - 1
@@ -13,29 +13,41 @@ CONCAT(patient_contact_firstname, ' ', patient_contact_lastname), "Emergency con
 FROM t_patient
 """
 
-patientColumns = ['uid', 'cid', 'name', 'birthDate', 'gender', 'telecom', 'contact_name', 'contact_relationship', 'contact_gender', 'contact_telcom']
+patientColumns = ['uid', 'cid', 'name', 'birthdate', 'gender', 'telecom', 'contact_name', 'contact_relationship', 'contact_gender', 'contact_telecom']
 
 isTakingSql = """
-SELECT v.visit_hn, b_item_id, o.order_date_time, od.order_drug_printable, od.order_drug_special_prescription_text
+SELECT v.visit_hn, b_item_id, od.order_drug_date_time, od.order_drug_printable, od.order_drug_special_prescription_text
+FROM t_visit v, t_order o, t_order_drug od
+WHERE v.t_visit_id = o.t_visit_id AND o.t_order_id = od.t_order_id AND 
+(v.visit_hn, b_item_id, od.order_drug_date_time) IN (SELECT DISTINCT v.visit_hn, b_item_id, max(od.order_drug_date_time)
 FROM t_visit v, t_order o, t_order_drug od
 WHERE v.t_visit_id = o.t_visit_id AND o.t_order_id = od.t_order_id
+GROUP BY v.visit_hn, b_item_id)
 """
 
 isTakingColumns = ['uid', 'code', 'authoredOn', 'dosageInstruction', 'note']
 
 isAllergicSql = """
-SELECT p.patient_hn, b_item_id, 'active', 'confirmed', 'allergy', 'medication', patient_drug_allergy_symptom, patient_drug_allergy_record_date_time
+SELECT p.patient_hn, b_item_id, "active", "confirmed", "allergy", "medication", patient_drug_allergy_symptom, patient_drug_allergy_record_date_time
+FROM t_patient_drug_allergy a, t_patient p
+WHERE a.t_patient_id = p.t_patient_id AND
+(p.patient_hn, b_item_id, patient_drug_allergy_record_date_time) IN (SELECT DISTINCT p.patient_hn, b_item_id, max(patient_drug_allergy_record_date_time)
 FROM t_patient_drug_allergy a, t_patient p
 WHERE a.t_patient_id = p.t_patient_id
+GROUP BY p.patient_hn, b_item_id)
 """
 
 isAllergicColumns = ['uid', 'code', 'clinicalStatus', 'verificationStatus', 'type', 'category', 'criticality', 'recordDate']
 
 isHavingSql = """
-SELECT v.visit_hn, diag_icd10_number, CASE WHEN diag_icd10_active = 1 THEN 'active' ELSE 'resolved' END as active,
-'confirmed', 'problem-list-item', diag_icd10_notice, diag_icd10_record_date_time
+SELECT v.visit_hn, diag_icd10_number, CASE WHEN diag_icd10_active = 1 THEN "active" ELSE "resolved" END as active,
+"confirmed", "problem-list-item", diag_icd10_notice, diag_icd10_record_date_time
+FROM t_visit v, t_diag_icd10 d
+WHERE v.t_visit_id = d.b_visit_clinic_id AND
+(v.visit_hn, diag_icd10_number, diag_icd10_record_date_time) IN (SELECT DISTINCT v.visit_hn, diag_icd10_number, max(diag_icd10_record_date_time)
 FROM t_visit v, t_diag_icd10 d
 WHERE v.t_visit_id = d.b_visit_clinic_id
+GROUP BY v.visit_hn, diag_icd10_number)
 """
 
 isHavingColumns = ['uid', 'code', 'clinicalStatus', 'verificationStatus', 'category', 'severity', 'recordDate']
@@ -61,7 +73,7 @@ def transform(sql, columns):
     return df
 
 def ETL():
-    patient = transform(patientSql, patientColumns).to_dict('index')
+    patient = loads(transform(patientSql, patientColumns).to_json(orient='index'))
     # contact = transform(contactSql, contactColumns).to_dict('index')
     all_patient = dict()
     for i in patient:
@@ -72,17 +84,17 @@ def ETL():
         all_patient[i]['isAllergic'] = []
         all_patient[i]['isHaving'] = []
 
-    isTaking = transform(isTakingSql, isTakingColumns).to_dict('index')
+    isTaking = loads(transform(isTakingSql, isTakingColumns).to_json(orient='index'))
     for i in isTaking:
         uid = isTaking[i]['uid']
         all_patient[uid]['isTaking'].append(isTaking[i])
 
-    isAllergic = transform(isAllergicSql, isAllergicColumns).to_dict('index')
+    isAllergic = loads(transform(isAllergicSql, isAllergicColumns).to_json(orient='index'))
     for i in isAllergic:
         uid = isAllergic[i]['uid']
         all_patient[uid]['isAllergic'].append(isAllergic[i])
 
-    isHaving = transform(isHavingSql, isHavingColumns).to_dict('index')
+    isHaving = loads(transform(isHavingSql, isHavingColumns).to_json(orient='index'))
     for i in isHaving:
         uid = isHaving[i]['uid']
         all_patient[uid]['isHaving'].append(isHaving[i])
@@ -97,7 +109,7 @@ def job():
     patients = ETL()
     #producer.send('patient1', value='HELLO WORLD')
     for i in range(2): 
-        producer.send('patient3', value=str([patients[i]]))
+        producer.send('patient2', value=[loads(dumps(patients[i]))])
         producer.flush()
         print("patient", i)
     print('running schedule')
@@ -108,5 +120,5 @@ def job():
 #     time.sleep(5)
 
 print('sleeping soon')
-time.sleep(15)
+time.sleep(40)
 job()
