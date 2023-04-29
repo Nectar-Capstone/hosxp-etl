@@ -7,7 +7,8 @@ from kafka import KafkaProducer
 
 # Have not cap create_date yet -> add WHERE creat_at > DATE(NOW()) - 1
 
-listOfPatient = tuple(range(1, 501, 1))
+# listOfPatient = tuple(range(1, 501, 1))
+listOfPatient = (1, 500)
 
 patientSql = """
 SELECT patient_hn, t_patient_id, CONCAT(patient_firstname, ' ', patient_lastname), patient_birthday, f_sex_id, patient_patient_mobile_phone,
@@ -99,7 +100,7 @@ def job():
                          dumps(x).encode('utf-8'))
     patients = ETL()
     print(patients)
-    producer.send('numtest', value='hello world')
+    producer.send('patient1', value=patients)
     producer.flush()
     print('running schedule')
 
