@@ -1,0 +1,141 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model AllergicIntoleranceSubstance {
+  code       String       @id @db.VarChar(255)
+  display    String       @db.VarChar(255)
+  IsAllergic IsAllergic[]
+}
+
+model ConditionProblemDiagnosis {
+  code     String     @id @db.VarChar(255)
+  display  String     @db.VarChar(255)
+  IsHaving IsHaving[]
+}
+
+model IsAllergic {
+  uid                          String                       @db.VarChar(64)
+  code                         String                       @db.VarChar(255)
+  clinicalStatus               String?                      @db.VarChar(255)
+  verificationStatus           String?                      @db.VarChar(255)
+  type                         String?                      @db.VarChar(255)
+  category                     String?                      @db.VarChar(255)
+  criticality                  String?                      @db.VarChar(255)
+  recordDate                   DateTime?                    @db.Date
+  Patient                      Patient                      @relation(fields: [uid], references: [uid], onDelete: Cascade, map: "fk_is_allergic_patient")
+  AllergicIntoleranceSubstance AllergicIntoleranceSubstance @relation(fields: [code], references: [code], onDelete: Cascade, map: "fk_is_allergic_substance")
+
+  @@id([uid, code])
+  @@index([code], map: "fk_is_allergic_substance")
+}
+
+model IsHaving {
+  uid                       String                    @db.VarChar(64)
+  code                      String                    @db.VarChar(255)
+  clinicalStatus            String?                   @db.VarChar(255)
+  verificationStatus        String?                   @db.VarChar(255)
+  category                  String?                   @db.VarChar(255)
+  severity                  String?                   @db.VarChar(255)
+  recordDate                DateTime?                 @db.Date
+  ConditionProblemDiagnosis ConditionProblemDiagnosis @relation(fields: [code], references: [code], onDelete: Cascade, map: "fk_is_having_diagnosis")
+  Patient                   Patient                   @relation(fields: [uid], references: [uid], onDelete: Cascade, map: "fk_is_having_patient")
+
+  @@id([uid, code])
+  @@index([code], map: "fk_is_having_diagnosis")
+}
+
+model IsTaking {
+  uid               String     @db.VarChar(64)
+  code              String     @db.VarChar(255)
+  authoredOn        DateTime?  @db.Date
+  dosageInstruction String?    @db.VarChar(255)
+  note              String?    @db.VarChar(255)
+  Medication        Medication @relation(fields: [code], references: [code], onDelete: Cascade, map: "fk_is_taking_medication")
+  Patient           Patient    @relation(fields: [uid], references: [uid], onDelete: Cascade, map: "fk_is_taking_patient")
+
+  @@id([uid, code])
+  @@index([code], map: "fk_is_taking_medication")
+}
+
+model Medication {
+  code     String     @id @db.VarChar(255)
+  display  String     @db.VarChar(255)
+  IsTaking IsTaking[]
+}
+
+model Organization {
+  oid                Int            @id
+  type               String?        @db.VarChar(255)
+  name               String         @db.VarChar(255)
+  address            String?        @db.VarChar(255)
+  telecom            String?        @db.VarChar(255)
+  partOf             Int?
+  Organization       Organization?  @relation("OrganizationToOrganization", fields: [partOf], references: [oid], onDelete: Cascade, map: "fk_organization_partof")
+  other_Organization Organization[] @relation("OrganizationToOrganization")
+  Practitioner       Practitioner[]
+
+  @@index([partOf], map: "fk_organization_partof")
+}
+
+model Patient {
+  uid                  String       @id @db.VarChar(64)
+  cid                  String       @db.VarChar(255)
+  name                 String       @db.VarChar(255)
+  gender               String?      @db.VarChar(10)
+  telecom              String?      @db.VarChar(255)
+  contact_name         String       @db.VarChar(255)
+  contact_relationship String       @db.VarChar(255)
+  contact_gender       String?      @db.VarChar(10)
+  contact_telecom      String       @db.VarChar(255)
+  birthdate            DateTime?    @db.Date
+  IsAllergic           IsAllergic[]
+  IsHaving             IsHaving[]
+  IsTaking             IsTaking[]
+  isAccess             isAccess[]
+}
+
+model Practitioner {
+  did          String       @id @db.VarChar(64)
+  name         String?      @db.VarChar(255)
+  gender       String?      @db.VarChar(10)
+  telecom      String?      @db.VarChar(255)
+  oid          Int
+  since        DateTime?    @db.Date
+  until        DateTime?    @db.Date
+  code         String?      @db.VarChar(255)
+  Organization Organization @relation(fields: [oid], references: [oid], onDelete: Cascade, map: "fk_practitioner_organization")
+  credential   credential[]
+  isAccess     isAccess[]
+
+  @@index([oid], map: "fk_practitioner_organization")
+}
+
+model credential {
+  username     String        @id @db.VarChar(64)
+  password     String?       @db.VarChar(64)
+  did          String?       @db.VarChar(64)
+  updatedAt    DateTime      @default(now()) @db.Timestamp(0)
+  createdAt    DateTime?     @default(now()) @db.Timestamp(0)
+  Practitioner Practitioner? @relation(fields: [did], references: [did], onDelete: NoAction, onUpdate: NoAction, map: "credential_ibfk_1")
+
+  @@index([did], map: "did")
+}
+
+model isAccess {
+  uid          String       @db.VarChar(64)
+  did          String       @db.VarChar(64)
+  latitide     String?      @db.VarChar(64)
+  longtitiude  String?      @db.VarChar(64)
+  actime       DateTime?    @default(now()) @db.Timestamp(0)
+  Patient      Patient      @relation(fields: [uid], references: [uid], onDelete: NoAction, onUpdate: NoAction, map: "patient")
+  Practitioner Practitioner @relation(fields: [did], references: [did], onDelete: NoAction, onUpdate: NoAction, map: "practitioner")
+
+  @@id([uid, did])
+  @@index([did], map: "practitioner_idx")
+}

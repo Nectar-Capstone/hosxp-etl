@@ -1,0 +1,27 @@
+{
+  "name": "nectar-consumer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "consumer.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "ts-node consumer.ts"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^18.16.2",
+    "@types/node-cron": "^3.0.7",
+    "@types/node-schedule": "^2.1.0",
+    "prisma": "^4.13.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.4"
+  },
+  "dependencies": {
+    "@prisma/client": "^4.13.0",
+    "dotenv": "^16.0.3",
+    "kafkajs": "^2.2.4",
+    "node-cron": "^3.0.2",
+    "node-schedule": "^2.1.1"
+  }
+}
