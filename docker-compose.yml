@@ -5,6 +5,20 @@ networks:
     name: rmoff_kafka
 
 services:
+
+  nectar-api:
+    build: 
+      context: ./Nectar-api
+      dockerfile: Dockerfile
+    ports:
+      - '3000:3000'
+    expose:
+      - 3000
+    restart: always
+    networks:
+      - rmoff_kafka
+    
+
   hosxp:
     build: 
       context: ./hosxp-etl
