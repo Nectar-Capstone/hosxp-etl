@@ -95,10 +95,11 @@ def job():
                          value_serializer=lambda x: 
                          dumps(x).encode('utf-8'))
     patients = ETL()
-    producer.send('patient1', value='HELLO WORLD')
-    # for i in range(500): 
-    #     producer.send('patient1', value='HELLO WORLD')
-    #     producer.flush()
+    #producer.send('patient1', value='HELLO WORLD')
+    for i in range(500): 
+        producer.send('patient1', value=str([patients[i]]))
+        producer.flush()
+        print("patient", i)
     print('running schedule')
 
 # schedule.every(5).seconds.do(job)

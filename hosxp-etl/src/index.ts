@@ -62,7 +62,7 @@ var task = cron.schedule("* * * * *", async () => {
       topic: "patient1",
       messages: [
         {
-          value: `sent at => ${new Date().toISOString()} with value ${patientISP}`,
+          value: JSON.stringify(patientISP),
         },
       ],
     });
