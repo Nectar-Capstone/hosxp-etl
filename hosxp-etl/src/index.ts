@@ -59,7 +59,7 @@ var task = cron.schedule("* * * * *", async () => {
     const patientISP = transformToISP(allPatient);
     console.log(JSON.stringify(patientISP, null, 4));
     await producer.send({
-      topic: "patient1",
+      topic: "patient2",
       messages: [
         {
           value: JSON.stringify(patientISP),

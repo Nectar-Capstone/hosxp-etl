@@ -96,8 +96,8 @@ def job():
                          dumps(x).encode('utf-8'))
     patients = ETL()
     #producer.send('patient1', value='HELLO WORLD')
-    for i in range(500): 
-        producer.send('patient1', value=str([patients[i]]))
+    for i in range(2): 
+        producer.send('patient3', value=str([patients[i]]))
         producer.flush()
         print("patient", i)
     print('running schedule')

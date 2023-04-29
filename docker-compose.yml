@@ -16,6 +16,18 @@ services:
       - rmoff_kafka
     restart: always
 
+  hos_consumer:
+    build: 
+      context: ./hos-consumer
+      dockerfile: Dockerfile
+    depends_on:
+      - hosxp
+      - hosos
+      - db
+      - broker
+    networks:
+      - rmoff_kafka
+
   hosos:
     build: 
       context: ./hosos-etl
