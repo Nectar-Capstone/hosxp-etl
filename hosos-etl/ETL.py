@@ -7,31 +7,27 @@ from kafka import KafkaProducer
 
 # Have not cap create_date yet -> add WHERE creat_at > DATE(NOW()) - 1
 
-# listOfPatient = tuple(range(1, 501, 1))
-listOfPatient = (1, 500)
-
 patientSql = """
 SELECT patient_hn, t_patient_id, CONCAT(patient_firstname, ' ', patient_lastname), patient_birthday, f_sex_id, patient_patient_mobile_phone,
 CONCAT(patient_contact_firstname, ' ', patient_contact_lastname), "Emergency contact person", patient_contact_sex_id, patient_contact_phone_number
 FROM t_patient
-WHERE patient_hn IN
-""" + str(listOfPatient)
+"""
 
 patientColumns = ['uid', 'cid', 'name', 'birthDate', 'gender', 'telecom', 'contact_name', 'contact_relationship', 'contact_gender', 'contact_telcom']
 
 isTakingSql = """
 SELECT v.visit_hn, b_item_id, o.order_date_time, od.order_drug_printable, od.order_drug_special_prescription_text
 FROM t_visit v, t_order o, t_order_drug od
-WHERE v.t_visit_id = o.t_visit_id AND o.t_order_id = od.t_order_id AND visit_hn IN
-""" + str(listOfPatient)
+WHERE v.t_visit_id = o.t_visit_id AND o.t_order_id = od.t_order_id
+"""
 
 isTakingColumns = ['uid', 'code', 'authoredOn', 'dosageInstruction', 'note']
 
 isAllergicSql = """
 SELECT p.patient_hn, b_item_id, 'active', 'confirmed', 'allergy', 'medication', patient_drug_allergy_symptom, patient_drug_allergy_record_date_time
 FROM t_patient_drug_allergy a, t_patient p
-WHERE a.t_patient_id = p.t_patient_id AND patient_hn IN
-""" + str(listOfPatient)
+WHERE a.t_patient_id = p.t_patient_id
+"""
 
 isAllergicColumns = ['uid', 'code', 'clinicalStatus', 'verificationStatus', 'type', 'category', 'criticality', 'recordDate']
 
@@ -39,8 +35,8 @@ isHavingSql = """
 SELECT v.visit_hn, diag_icd10_number, CASE WHEN diag_icd10_active = 1 THEN 'active' ELSE 'resolved' END as active,
 'confirmed', 'problem-list-item', diag_icd10_notice, diag_icd10_record_date_time
 FROM t_visit v, t_diag_icd10 d
-WHERE v.t_visit_id = d.b_visit_clinic_id AND visit_hn IN
-""" + str(listOfPatient)
+WHERE v.t_visit_id = d.b_visit_clinic_id
+"""
 
 isHavingColumns = ['uid', 'code', 'clinicalStatus', 'verificationStatus', 'category', 'severity', 'recordDate']
 
@@ -92,16 +88,17 @@ def ETL():
         all_patient[uid]['isHaving'].append(isHaving[i])
 
     list_all_patient = [all_patient[i] for i in all_patient]
-    return str(list_all_patient)
+    return list_all_patient
 
 def job():
     producer = KafkaProducer(bootstrap_servers=['broker:29092'],
                          value_serializer=lambda x: 
                          dumps(x).encode('utf-8'))
     patients = ETL()
-    print(patients)
-    producer.send('patient1', value=patients)
-    producer.flush()
+    producer.send('patient1', value='HELLO WORLD')
+    # for i in range(500): 
+    #     producer.send('patient1', value='HELLO WORLD')
+    #     producer.flush()
     print('running schedule')
 
 # schedule.every(5).seconds.do(job)
