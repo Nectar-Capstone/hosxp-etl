@@ -25,9 +25,21 @@ export class UsersService {
         uid: uid,
       },
       include: {
-        IsHaving: true,
-        IsAllergic: true,
-        IsTaking: true,
+        IsHaving: {
+          include: {
+            ConditionProblemDiagnosis: true,
+          },
+        },
+        IsAllergic: {
+          include: {
+            AllergicIntoleranceSubstance: true,
+          },
+        },
+        IsTaking: {
+          include: {
+            Medication: true,
+          },
+        },
       },
     });
   }
