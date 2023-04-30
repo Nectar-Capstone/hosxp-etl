@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { Patient } from '@prisma/client';
 import { JwtAuthGuard } from 'src/auth/guard/jwt-auth.guard';
@@ -8,8 +8,14 @@ export class UsersController {
   constructor(private userService: UsersService) {}
 
   @UseGuards(JwtAuthGuard)
-  @Get('/patient')
+  @Get('/patients')
   getPatient(): Promise<Patient[]> {
     return this.userService.findPatient();
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/patient')
+  getOnePatient(@Query() query: { uid: string }): Promise<Patient> {
+    return this.userService.findOne(query.uid);
   }
 }

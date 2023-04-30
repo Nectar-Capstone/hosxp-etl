@@ -22,9 +22,9 @@ services:
       context: ./Nectar-api
       dockerfile: Dockerfile
     ports:
-      - '3000:3000'
+      - '3001:3000'
     expose:
-      - 3000
+      - 3001
     restart: always
     networks:
       - rmoff_kafka

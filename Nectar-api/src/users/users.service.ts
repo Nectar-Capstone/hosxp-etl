@@ -18,4 +18,17 @@ export class UsersService {
       },
     });
   }
+
+  async findOne(uid: string): Promise<Patient> {
+    return this.prisma.patient.findUnique({
+      where: {
+        uid: uid,
+      },
+      include: {
+        IsHaving: true,
+        IsAllergic: true,
+        IsTaking: true,
+      },
+    });
+  }
 }
